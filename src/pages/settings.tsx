@@ -1,3 +1,5 @@
+import ChangeName from '@/components/change_name';
+
 interface SettingsProps {
   onNavigate: (page: 'dashboard' | 'settings' | 'login') => void;
 }
@@ -13,6 +15,7 @@ function Settings({ onNavigate }: SettingsProps) {
       >
         Go Back to Dashboard
       </button>
+      <ChangeName></ChangeName>
     </div>
   );
 }

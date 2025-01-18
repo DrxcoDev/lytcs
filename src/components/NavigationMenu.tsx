@@ -28,7 +28,8 @@ function NavigationMenu({ onNavigate, user }: NavigationMenuProps) {
   };
 
   return (
-    <nav className="w-64 bg-gray-800 text-white min-h-screen flex flex-col">
+    <nav className="w-64 bg-neutral-900 text-white min-h-screen flex flex-col">
+      <h1 className='p-4 text-3xl'>Lyts</h1>
       <ul className="flex-grow">
         <li
           className="p-4 hover:bg-gray-700 cursor-pointer"
