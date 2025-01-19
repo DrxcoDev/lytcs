@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Lock, Mail } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
-import "@/styles/login_error.css";
+import '@/styles/login_error.css';
 
 interface LoginPageProps {
   onNavigate: (
@@ -24,6 +24,7 @@ export function LoginPage({ onNavigate }: LoginPageProps) {
     password: '',
   });
 
+  // Manejo de cambios en los campos del formulario
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -31,6 +32,7 @@ export function LoginPage({ onNavigate }: LoginPageProps) {
     });
   };
 
+  // Validación del formulario
   const validateFormData = () => {
     if (!formData.email || !formData.password) {
       toast({
@@ -54,13 +56,13 @@ export function LoginPage({ onNavigate }: LoginPageProps) {
     return true;
   };
 
+  // Manejo del inicio de sesión con Discord
   const handleDiscordLogin = async () => {
     setIsLoading(true);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'discord',
       });
-
       if (error) throw error;
     } catch (error) {
       toast({
@@ -76,10 +78,10 @@ export function LoginPage({ onNavigate }: LoginPageProps) {
     }
   };
 
+  // Redirección al iniciar sesión correctamente
   useEffect(() => {
-    // Monitor the auth state and redirect if there's a session
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      (_event, session) => {
         if (session) {
           toast({
             title: 'Logged in',
@@ -90,40 +92,46 @@ export function LoginPage({ onNavigate }: LoginPageProps) {
       }
     );
 
-    // Cleanup the listener on unmount
     return () => {
       authListener.subscription.unsubscribe();
     };
   }, [onNavigate, toast]);
 
+  // Envío del formulario
   const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsLoading(true);
-
+  
     if (!validateFormData()) {
       setIsLoading(false);
       return;
     }
-
+  
+    const { email, password } = formData;
+    console.log('Sending data to Supabase:', { email, password });
+  
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
-
-      if (error) throw error;
-
+  
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+  
       toast({
         title: 'Success!',
         description: "You've been logged in successfully.",
       });
-
+  
       onNavigate('dashboard');
     } catch (error) {
+      console.error('Error during login:', error);
       toast({
         title: 'Error',
-        description:
-          error instanceof Error ? error.message : 'Failed to sign in.',
+        description: error instanceof Error ? error.message : 'Failed to sign in.',
         variant: 'destructive',
       });
     } finally {
@@ -133,26 +141,6 @@ export function LoginPage({ onNavigate }: LoginPageProps) {
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4">
-      <div className="notifications-container">
-        <div className="error-alert">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              
-              <svg aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" class="error-svg">
-                <path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" fill-rule="evenodd"></path>
-              </svg>
-            </div>
-            <div className="error-prompt-container">
-              <p className="error-prompt-heading">The login with email has deshabilited
-              </p><div className="error-prompt-wrap">
-                <ul className="error-prompt-list" role="list">
-                  <li>You can with Discord</li>
-                </ul>
-            </div>
-            </div>
-          </div>
-        </div>
-      </div>
       <Card className="w-full max-w-lg p-8 shadow-xl">
         <div className="flex flex-col space-y-6">
           <div className="flex flex-col space-y-2 text-center">
@@ -177,29 +165,16 @@ export function LoginPage({ onNavigate }: LoginPageProps) {
                     type="email"
                     value={formData.email}
                     onChange={handleChange}
-                    autoCapitalize="none"
-                    autoComplete="email"
-                    autoCorrect="off"
                     disabled={isLoading}
-                    className="pl-10 border-blue-200 focus:border-blue-400 focus:ring-blue-400"
-                    required
+                    className="pl-10"
                   />
                 </div>
               </div>
 
               <div className="grid gap-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-blue-700">
-                    Password
-                  </Label>
-                  <Button
-                    variant="link"
-                    className="px-0 font-normal text-blue-600 hover:text-blue-700"
-                    onClick={() => onNavigate('forgot-password')}
-                  >
-                    Forgot password?
-                  </Button>
-                </div>
+                <Label htmlFor="password" className="text-blue-700">
+                  Password
+                </Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-5 w-5 text-blue-400" />
                   <Input
@@ -208,19 +183,16 @@ export function LoginPage({ onNavigate }: LoginPageProps) {
                     type="password"
                     value={formData.password}
                     onChange={handleChange}
-                    autoCapitalize="none"
-                    autoComplete="current-password"
                     disabled={isLoading}
-                    className="pl-10 border-blue-200 focus:border-blue-400 focus:ring-blue-400"
-                    required
+                    className="pl-10"
                   />
                 </div>
               </div>
             </div>
 
             <Button
-              className="w-full bg-blue-600 hover:bg-blue-700"
               type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700"
               disabled={isLoading}
             >
               {isLoading && (
@@ -241,28 +213,24 @@ export function LoginPage({ onNavigate }: LoginPageProps) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <Button
-              variant="outline"
-              disabled={isLoading}
-              onClick={handleDiscordLogin}
-              className="border-blue-200 hover:bg-blue-50"
-            >
-              {/* <Icons.discord className="mr-2 h-4 w-4" /> */}
-              Discord
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            disabled={isLoading}
+            onClick={handleDiscordLogin}
+          >
+            Discord
+          </Button>
 
-          <p className="text-center text-sm text-blue-600">
-            Don't have an account?{' '}
+          {/* Botón para redirigir al signup */}
+          <div className="mt-4 text-center">
             <Button
               variant="link"
-              className="px-0 text-blue-700 hover:text-blue-800"
               onClick={() => onNavigate('signup')}
+              className="text-blue-600 hover:text-blue-800"
             >
-              Sign up
+              Don't have an account? Sign up
             </Button>
-          </p>
+          </div>
         </div>
       </Card>
     </div>

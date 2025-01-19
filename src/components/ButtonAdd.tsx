@@ -1,10 +1,14 @@
 import * as React from 'react';
 import styled from 'styled-components';
 
-const ButtonAdd: React.FC = () => {
+interface ButtonAddProps {
+  onClick: () => void;
+}
+
+const ButtonAdd: React.FC<ButtonAddProps> = ({ onClick }) => {
   return (
     <StyledWrapper>
-      <button>
+      <button onClick={onClick}>
         <span className="text-gray-100">+</span>
       </button>
     </StyledWrapper>

@@ -1,4 +1,5 @@
-import { Loader2, LucideCrop as LucideProps, Github, Chrome, LayoutDashboard } from "lucide-react";
+import { Loader2, Github, Chrome, LayoutDashboard } from "lucide-react";
+
 
 export const Icons = {
   spinner: Loader2,

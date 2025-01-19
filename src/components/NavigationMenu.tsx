@@ -1,6 +1,6 @@
+import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import './logout.css';
-import { useEffect, useState } from 'react';
 
 interface NavigationMenuProps {
   onNavigate: (page: 'dashboard' | 'settings' | 'login') => void;
@@ -13,7 +13,9 @@ const LogoutIcon = () => (
   </svg>
 );
 
-function NavigationMenu({ onNavigate, user }: NavigationMenuProps) {
+function NavigationMenu({ onNavigate }: NavigationMenuProps) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   const handleLogout = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -28,37 +30,57 @@ function NavigationMenu({ onNavigate, user }: NavigationMenuProps) {
   };
 
   return (
-    <nav className="w-64 bg-neutral-900 text-white min-h-screen flex flex-col">
-      <h1 className='p-4 text-3xl'>Lyts</h1>
-      <ul className="flex-grow">
-        <li
-          className="p-4 hover:bg-gray-700 cursor-pointer"
-          onClick={() => onNavigate('dashboard')}
-        >
-          Home
-        </li>
-        <li
-          className="p-4 hover:bg-gray-700 cursor-pointer"
-          onClick={() => onNavigate('settings')}
-        >
-          Settings
-        </li>
-      </ul>
-      {/* <div className="p-4 text-white bg-gray-700 flex items-center justify-between">
-        {user ? (
-          <span className="font-bold">
-            Hello, {user?.user_metadata?.full_name || 'User'}!
-          </span>
-        ) : (
-          <span>Loading...</span>
-        )}
-      </div> */}
-      <button className="Btn" onClick={handleLogout}>
-        <div className="sign">
-          <LogoutIcon />
-        </div>
-        <div className="text">Logout</div>
-      </button>
+    <nav className="w-full md:w-[200px] bg-neutral-900 text-white min-h-screen flex flex-col sm:w-[100px]">
+      {/* Contenedor para el título y el menú de hamburguesa */}
+      <div className="flex flex-col items-center p-4 md:hidden">
+        <h1 className="text-3xl">Lyts</h1>
+        {/* Menú de hamburguesa debajo del título */}
+        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="mt-4">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            className="w-6 h-6"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
+      </div>
+
+      {/* Menú lateral para pantallas grandes */}
+      <div
+        className={`${
+          isMenuOpen ? 'block' : 'hidden'
+        } md:block flex-grow md:flex md:flex-col md:items-start`}
+      >
+        <h1 className="p-4 text-3xl hidden md:block">Lyts</h1>
+        <ul className="flex-grow">
+          <li
+            className="p-4 hover:bg-gray-700 cursor-pointer"
+            onClick={() => onNavigate('dashboard')}
+          >
+            Home
+          </li>
+          <li
+            className="p-4 hover:bg-gray-700 cursor-pointer"
+            onClick={() => onNavigate('settings')}
+          >
+            Settings
+          </li>
+        </ul>
+        <button className="Btn ml-2 mb-2" onClick={handleLogout}>
+          <div className="sign">
+            <LogoutIcon />
+          </div>
+          <div className="text">Logout</div>
+        </button>
+      </div>
     </nav>
   );
 }

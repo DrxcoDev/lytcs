@@ -33,27 +33,41 @@ export function SignupPage({ onNavigate }: SignupPageProps) {
     event.preventDefault();
     setIsLoading(true);
 
+    // Validación básica
+    if (!formData.email || !formData.password) {
+      toast({
+        title: "Error",
+        description: "Please fill in both email and password.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
     try {
+      // Intentar registrarse solo con email y contraseña
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
-        options: {
-          data: {
-            full_name: formData.fullName,
-          }
-        }
       });
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
+      // Si la cuenta se creó exitosamente, luego intentamos agregar la información adicional
       if (data.user) {
-        // Update the profile with company information
         const { error: profileError } = await supabase
           .from('profiles')
-          .update({ company: formData.company })
-          .eq('id', data.user.id);
+          .upsert([{ 
+            id: data.user.id, 
+            full_name: formData.fullName || null,  // Permitimos que el nombre completo sea opcional
+            company: formData.company || null       // Permitimos que la compañía sea opcional
+          }]);
 
-        if (profileError) throw profileError;
+        if (profileError) {
+          throw profileError;
+        }
 
         toast({
           title: "Account created!",
@@ -62,10 +76,11 @@ export function SignupPage({ onNavigate }: SignupPageProps) {
         onNavigate('login');
       }
     } catch (error) {
+      console.error(error);  // Mostramos el error completo en la consola para depuración
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to create account",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -101,7 +116,6 @@ export function SignupPage({ onNavigate }: SignupPageProps) {
                     autoCorrect="off"
                     disabled={isLoading}
                     className="pl-10 border-blue-200 focus:border-blue-400 focus:ring-blue-400"
-                    required
                   />
                 </div>
               </div>
@@ -140,7 +154,6 @@ export function SignupPage({ onNavigate }: SignupPageProps) {
                     autoCorrect="off"
                     disabled={isLoading}
                     className="pl-10 border-blue-200 focus:border-blue-400 focus:ring-blue-400"
-                    required
                   />
                 </div>
               </div>
